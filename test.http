@@ -1,0 +1,2 @@
+GET http://www.example.com/
+Range: bytes=0-
