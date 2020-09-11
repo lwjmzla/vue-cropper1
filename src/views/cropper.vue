@@ -17,12 +17,14 @@
       :centerBox="option.centerBox"
       :high="option.high"
       :infoTrue="option.infoTrue"
+      :fixed="option.fixed"
       @realTime="realTime"
       @imgLoad="imgLoad"
       @cropMoving="cropMoving"
       :enlarge="option.enlarge"
     ></vueCropper>
     <el-button @click="handleCrop">裁切</el-button>
+    <el-button @click="handleCrop1">裁切1</el-button>
     <img :src="imgUrl" />
   </div>
 </template>
@@ -45,13 +47,13 @@ export default {
         outputSize: 0.8, // 裁剪生成图片的质量
         outputType: 'jpeg', // 裁剪生成图片的格式
         // canScale: false, // 图片是否允许滚轮缩放
-        autoCrop: false, // 是否默认生成截图框
+        autoCrop: true, // 是否默认生成截图框
         autoCropWidth: 200, // 默认生成截图框宽度
         autoCropHeight: 200, // 默认生成截图框高度
         fixedBox: false, // 固定截图框大小 不允许改变
-        // fixed: true, // 是否开启截图框宽高固定比例
+        fixed: false, // 是否开启截图框宽高固定比例
         // fixedNumber: [7, 5], // 截图框的宽高比例
-        full: false, // 是否输出原图比例的截图
+        full: false, // 是否输出原图比例的截图  // !false意味着 输出你看到的大小的图片，true 输出没缩放的图片
         canMove: true, // 上传图片是否可以移动
         canMoveBox: true, // 截图框能否拖动
         original: false, // 上传图片按照原始比例渲染 //!用false 相当于 自适应显示contain效果
@@ -77,6 +79,14 @@ export default {
     handleCrop() {
       // 获取截图的base64 数据
       this.$refs.cropper.getCropData((data) => {
+        // do something
+        console.log(data)
+        this.imgUrl = data
+      })
+    },
+    handleCrop1() {
+      // 获取截图的base64 数据
+      this.$refs.cropper.getCropData1((data) => {
         // do something
         console.log(data)
         this.imgUrl = data

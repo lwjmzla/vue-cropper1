@@ -821,6 +821,7 @@ export default {
       e.preventDefault(); // !阻止默认事件，假设外面的div很长，也不会让外面的滚轮滚动，只让当前区域滚动生效
       let scale = this.scale;
       var change = e.deltaY || e.wheelDelta;
+      // console.log(change) // !change > 0 就是缩小，change < 0 就是放大
       // 根据图片本身大小 决定每次改变大小的系数, 图片越大系数越小
       var isFirefox = navigator.userAgent.indexOf("Firefox");
       change = isFirefox > 0 ? change * 30 : change;
@@ -829,31 +830,24 @@ export default {
         change = -change;
       }
       // 1px - 0.2
-      var coe = this.coe;
-      coe =
-        coe / this.trueWidth > coe / this.trueHeight
-          ? coe / this.trueHeight
-          : coe / this.trueWidth;
-      var num = coe * change;
-      num < 0
-        ? (scale += Math.abs(num))
-        : scale > Math.abs(num)
-        ? (scale -= Math.abs(num))
-        : scale;
+      var coe = this.coe; // !图片缩放系数
+      coe = coe / this.trueWidth > coe / this.trueHeight ? coe / this.trueHeight : coe / this.trueWidth;
+      var num = coe * change; // !change > 0 就是缩小，change < 0 就是放大
+      num < 0 ? (scale += Math.abs(num)) : scale > Math.abs(num) ? (scale -= Math.abs(num)) : scale; //!对scale操作
       // 延迟0.1s 每次放大大或者缩小的范围
       let status = num < 0 ? "add" : "reduce";
       if (status !== this.coeStatus) {
         this.coeStatus = status;
         this.coe = 0.2;
       }
-      if (!this.scaling) {
+      if (!this.scaling) { // !节流
         this.scalingSet = setTimeout(() => {
           this.scaling = false;
           this.coe = this.coe += 0.01;
         }, 50);
       }
       this.scaling = true;
-      if (!this.checkoutImgAxis(this.x, this.y, scale)) {
+      if (!this.checkoutImgAxis(this.x, this.y, scale)) { // !限制缩放用的
         return false;
       }
       this.scale = scale;
@@ -1325,7 +1319,32 @@ export default {
         axis: this.getCropAxis()
       });
     },
+    getCropData1(cb) {
+      let canvas = document.createElement("canvas");
+      let ctx = canvas.getContext("2d");
+      let img = new Image();
 
+      // 判断图片是否是base64
+      var s = this.img.substr(0, 4);
+      if (s !== "data") {
+        img.crossOrigin = "Anonymous";
+      }
+      img.src = this.imgs;
+
+      let dx = (this.x - this.cropOffsertX + (this.trueWidth * (1 - this.scale)) / 2)
+      let dy = (this.y - this.cropOffsertY + (this.trueHeight * (1 - this.scale)) / 2)
+      console.log(dx,dy)
+
+      img.onload = () => {
+        canvas.width = this.cropW; // !给canvas设置宽高很重要，否则默认只有300*150的画布
+        canvas.height = this.cropH;
+        ctx.drawImage(img, dx, dy,img.width * this.scale, img.height * this.scale); // !第4，5个参数 规定图像的宽度。
+        let imgBase64 = canvas.toDataURL('image/' + this.outputType); // !其实就是base64那串string
+        cb(imgBase64)
+      }
+      
+    },
+    // todo裁切函数
     getCropChecked(cb) {
       let canvas = document.createElement("canvas");
       let img = new Image();
@@ -1349,19 +1368,15 @@ export default {
           let imgW = trueWidth * this.scale * dpr;
           let imgH = trueHeight * this.scale * dpr;
           // 图片x轴偏移
-          let dx =
-            (this.x - cropOffsertX + (this.trueWidth * (1 - this.scale)) / 2) *
-            dpr;
+          let dx = (this.x - cropOffsertX + (this.trueWidth * (1 - this.scale)) / 2) * dpr;
           // 图片y轴偏移
-          let dy =
-            (this.y - cropOffsertY + (this.trueHeight * (1 - this.scale)) / 2) *
-            dpr;
+          let dy = (this.y - cropOffsertY + (this.trueHeight * (1 - this.scale)) / 2) * dpr;
           //保存状态
           setCanvasSize(width, height);
           ctx.save();
           switch (rotate) {
             case 0:
-              if (!this.full) {
+              if (!this.full) { // !full为  false意味着 输出你看到的大小的图片，true 输出没缩放的图片
                 ctx.drawImage(img, dx, dy, imgW, imgH);
               } else {
                 // 输出原图比例截图
@@ -1597,7 +1612,7 @@ export default {
           this.x = -(this.trueWidth - this.trueWidth * this.scale) / 2 +(this.w - this.trueWidth * this.scale) / 2;
           this.y = -(this.trueHeight - this.trueHeight * this.scale) / 2 +(this.h - this.trueHeight * this.scale) / 2;
           this.loading = false;
-          // // 获取是否开启了自动截图
+          // 获取是否开启了自动截图
           if (this.autoCrop) {
             this.goAutoCrop();
           }
@@ -1729,7 +1744,7 @@ export default {
       // 判断是否大于容器
       this.cropW = w;
       this.cropH = h;
-      this.checkCropLimitSize()
+      this.checkCropLimitSize() // !这个没什么卵用
       this.$nextTick(() => {
         // 居中走一走
         this.cropOffsertX = (this.w - this.cropW) / 2;
