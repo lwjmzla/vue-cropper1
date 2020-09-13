@@ -1,7 +1,20 @@
 <template>
   <div id="app">
-    <vueCropper
+    <myVueCropper
       ref="cropper"
+      :img="option.img"
+      :info="true"
+      :full="option.full"
+      :canMove="option.canMove"
+      :canMoveBox="option.canMoveBox"
+      :original="option.original"
+      :autoCrop="option.autoCrop"
+      :autoCropWidth="option.autoCropWidth"
+      :autoCropHeight="option.autoCropHeight"
+      :infoTrue="option.infoTrue"
+    ></myVueCropper>
+    <!-- <vueCropper
+      ref=""
       :img="option.img"
       :outputSize="option.outputSize"
       :outputType="option.outputType"
@@ -22,8 +35,8 @@
       @imgLoad="imgLoad"
       @cropMoving="cropMoving"
       :enlarge="option.enlarge"
-    ></vueCropper>
-    <el-button @click="handleCrop">裁切</el-button>
+    ></vueCropper> -->
+    <!-- <el-button @click="handleCrop">裁切</el-button> -->
     <el-button @click="handleCrop1">裁切1</el-button>
     <img :src="imgUrl" />
   </div>
@@ -31,10 +44,12 @@
 
 <script>
 import vueCropper from '@/components/vue-cropper.vue' 
+import myVueCropper from '@/components/myVueCropper.vue' 
 export default {
   name: 'cropper',
   components: {
-    vueCropper
+    vueCropper,
+    myVueCropper
   },
   data() {
     return {
