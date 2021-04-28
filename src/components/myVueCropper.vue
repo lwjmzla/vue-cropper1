@@ -16,6 +16,7 @@
       @mousedown="startMove"
       @touchstart="startMove"
     ></div>
+    <!-- startMove函数有bug，待修复 -->
     <div v-show="cropping" class="cropper-crop-box" :style="{'width': cropW + 'px','height': cropH + 'px','transform': 'translate3d('+ cropOffsertX + 'px,' + cropOffsertY + 'px,' + '0)'}">
       <span class="cropper-view-box">
         <img
